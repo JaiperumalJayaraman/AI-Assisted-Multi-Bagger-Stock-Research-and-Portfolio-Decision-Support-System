@@ -1,86 +1,95 @@
 # AI-Assisted Multi-Bagger Stock Research and Portfolio Decision Support System
 
-A student-built research dashboard for exploring listed companies, reviewing available market data, comparing selected financial indicators, and modeling a hypothetical portfolio.
+A student project for company research, market-data exploration, preliminary financial screening, and hypothetical portfolio tracking.
 
-> **Important:** This repository currently contains an explainable, rule-based screening prototype—not a trained AI model or a reliable predictor of multi-bagger returns. Scores are research heuristics, not investment recommendations.
+> **Important:** The current screening score is rule-based. It is not a trained AI prediction model and cannot reliably predict which stocks will become multi-baggers. This project is for education and research support, not personalized investment advice.
 
-## Features
+## Two ways to run the project
 
-- **Market snapshot:** latest available adjusted close, recent price change, company/sector information, and selected valuation/fundamental indicators.
-- **Price history:** interactive chart for a selectable historical period.
-- **Explainable screening score:** weighted indicators for revenue growth, operating margin, debt/equity, forward P/E, and return on equity. Missing fields are excluded and the remaining weights are normalized.
-- **Portfolio sandbox:** edit hypothetical quantities, average costs, and latest prices; view value and unrealized P/L; export holdings as CSV.
-- **Research workflow:** practical prompts for deeper company analysis and risk review.
+This repository contains both the original Streamlit prototype and a separate HTML web interface backed by Python/Flask.
 
-## Tech stack
+### Option A — HTML website (Flask backend)
 
-- Python
-- Streamlit — interactive web UI
-- yfinance — market/company data access
-- pandas — data handling
-- Plotly — charts
+This starts the responsive HTML dashboard in your browser while the Python backend fetches stock information via `yfinance`.
 
-## Run locally (Windows)
-
-Install Python 3.10 or newer, then open PowerShell in the project folder:
-
+**Windows (PowerShell):**
 ```powershell
 py -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
-streamlit run app.py
+python server.py
 ```
 
-Open the local URL printed by Streamlit (usually http://localhost:8501). An internet connection is required to fetch market data.
+Then open **http://127.0.0.1:5000** in your browser. Keep the terminal window open while using the site; it runs the backend that supplies market data. Do not double-click `index.html` directly, because the API endpoints require the Python server.
 
-### macOS / Linux
-
+**macOS / Linux:**
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+python server.py
+```
+
+### Option B — Original Streamlit app
+
+Use this if you prefer the original Python dashboard:
+
+```powershell
 streamlit run app.py
 ```
 
-## How to use
+Streamlit usually opens at http://localhost:8501.
 
-1. Enter a ticker in the sidebar. Examples for Indian listings include `RELIANCE.NS`, `TCS.NS`, and `INFY.NS`; availability depends on the data provider.
-2. Choose a historical price period.
-3. Review the company snapshot, chart and factor-level screening table.
-4. Use the portfolio sandbox for hypothetical holdings, not brokerage execution.
-5. Export the sample holdings to CSV if needed for a report.
+## Features currently implemented
+
+- Latest available stock close and recent price movement.
+- Historical adjusted-close chart for selected periods.
+- Company summary, sector and industry when available.
+- Financial metrics: revenue growth, operating margin, debt/equity, forward P/E, and return on equity.
+- Explainable, rule-based screening score using available factors.
+- Multi-stock comparison page in the HTML interface.
+- Hypothetical portfolio tracker with editable quantity/cost, price refresh, unrealized P/L and CSV export.
+- Responsive HTML, CSS and JavaScript interface, with Flask endpoints that retrieve data on the server side.
+
+## Tech stack
+
+- Python
+- Flask — backend/API for the HTML site
+- HTML, CSS and JavaScript — web interface
+- Streamlit — alternative dashboard
+- yfinance — Yahoo Finance market/company data access
+- pandas — original Streamlit data handling
+- Plotly — original Streamlit charting
+- Chart.js — price chart in the HTML interface
+
+## Example tickers
+
+For Indian listings, try `RELIANCE.NS`, `TCS.NS` and `INFY.NS`. For US listings, examples include `AAPL` and `XYL`. Provider coverage can vary by symbol.
 
 ## Scoring methodology
 
-The screening score uses these initial weights:
+The initial weighted factors are revenue growth (30%), operating margin (20%), debt/equity (20%), forward P/E (15%), and return on equity (15%). Each available metric is converted onto a 0–100 heuristic scale using simple thresholds, and the remaining factor weights are normalized when some data is missing.
 
-| Factor | Weight |
-|---|---:|
-| Revenue growth | 30% |
-| Operating margin | 20% |
-| Debt/equity | 20% |
-| Forward P/E | 15% |
-| Return on equity | 15% |
-
-Each available factor is transformed onto a 0–100 heuristic scale using simple thresholds. The score is not a probability, forecast, or calibrated estimate of future returns. The method does not yet adjust for sector-specific norms, survivorship bias, data revisions, accounting quality, or point-in-time availability. Compare companies within appropriate sectors and verify all metrics against filings.
+This is a preliminary screen—not an estimate of the probability of future returns. The method does not yet account for sector-specific norms, survivorship bias, historical point-in-time availability, accounting quality, or data revisions. Validate values against filings before drawing conclusions.
 
 ## Known limitations
 
-- Market data is provided by Yahoo Finance through `yfinance`; availability, freshness, definitions, and coverage may vary. Some tickers/metrics may not resolve.
-- Fundamentals may be missing or inconsistent; `N/A` does not mean zero or healthy.
-- The portfolio table uses the prices entered by the user. It is not connected to a brokerage account and does not model taxes, fees, dividends, corporate actions, or currency conversion.
-- This version does not ingest annual reports, summarize earnings calls, use an LLM, train a prediction model, or backtest a strategy. Those are planned extensions, not currently implemented features.
+- Yahoo Finance data can be delayed, incomplete, or inconsistent. Some tickers and fundamentals will not resolve.
+- The HTML site needs the Flask server running; opening `index.html` directly will not provide stock data.
+- The portfolio is a local, hypothetical tracker, not connected to a brokerage account. It does not model fees, taxes, dividends, corporate actions, or currency conversion. Do not combine different currencies without conversion.
+- The current version does not ingest annual reports, summarize earnings calls, use a large language model, train a predictive model, or backtest a strategy. These are possible future extensions, not current features.
+- A working local server is not the same as a public deployed website. To share the HTML site publicly, deploy the Python backend to a suitable host; GitHub Pages alone cannot run the Flask/yfinance backend.
 
-## Roadmap
+## Next steps
 
-1. Add company-universe screening with clear filters and sector-aware comparisons.
-2. Add annual-report and earnings-call ingestion with source citations and risk/opportunity extraction.
-3. Add a research memo template: thesis, catalysts, valuation, risks, and thesis-break conditions.
-4. Build a reproducible historical dataset and leakage-aware backtesting pipeline before training and evaluating any prediction model.
-5. Add tests, input validation, caching checks, and a deployment workflow.
+1. Test different tickers and all portfolio actions.
+2. Add annual-report/earnings-call ingestion with citations and risk/opportunity extraction.
+3. Add a research memo with thesis, catalysts, valuation, risks and thesis-break conditions.
+4. Build point-in-time data and leakage-aware backtesting before evaluating any prediction model.
+5. Add automated tests and a deployment workflow.
 
 ## Disclaimer
 
-This project is for education and research support only. It does not provide personalized financial advice, guarantee returns, or identify future multi-baggers with certainty. Verify data independently and consult a qualified professional before making investment decisions.
+For educational use only. This software does not guarantee returns, predict future multi-baggers with certainty, or provide personalized financial advice. Independently verify data and consult a qualified professional before making investment decisions.
