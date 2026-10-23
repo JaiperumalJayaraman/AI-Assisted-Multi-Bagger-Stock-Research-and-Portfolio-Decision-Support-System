@@ -367,7 +367,7 @@
   function explainFetchError(error) {
     const message = error && error.message ? error.message : String(error || "Unknown error");
     if (error instanceof TypeError || /failed to fetch|networkerror|load failed/i.test(message)) {
-      if (location.protocol === "file:" || /(^|\\.)github\\.io$/.test(location.hostname) || location.hostname === "github.com" || /githubusercontent\\.com$/.test(location.hostname)) {
+      if (location.protocol === "file:" || location.hostname.endsWith("github.io") || location.hostname === "github.com" || location.hostname.endsWith("githubusercontent.com")) {
         return "The HTML page is open without its Python backend. Open the deployed website URL, or run python server.py and visit http://127.0.0.1:5000. Opening index.html directly or from GitHub cannot load stock data.";
       }
       return "Cannot reach the stock-data backend. Make sure python server.py is running, then open this app at http://127.0.0.1:5000 (not a file:// URL or a separate static preview).";
