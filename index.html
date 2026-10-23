@@ -364,6 +364,16 @@
     element.textContent = message;
     element.className = "status" + (kind ? " " + kind : "");
   }
+  function explainFetchError(error) {
+    const message = error && error.message ? error.message : String(error || "Unknown error");
+    if (error instanceof TypeError || /failed to fetch|networkerror|load failed/i.test(message)) {
+      if (location.protocol === "file:" || /(^|\\.)github\\.io$/.test(location.hostname) || location.hostname === "github.com" || /githubusercontent\\.com$/.test(location.hostname)) {
+        return "The HTML page is open without its Python backend. Open the deployed website URL, or run python server.py and visit http://127.0.0.1:5000. Opening index.html directly or from GitHub cannot load stock data.";
+      }
+      return "Cannot reach the stock-data backend. Make sure python server.py is running, then open this app at http://127.0.0.1:5000 (not a file:// URL or a separate static preview).";
+    }
+    return message;
+  }
   function setLoading(button, isLoading, label) {
     button.disabled = isLoading;
     if (isLoading) button.dataset.oldLabel = button.textContent;
@@ -390,7 +400,7 @@
       renderStock(data);
       setStatus("loadStatus", "Loaded " + data.ticker + " successfully.", "good");
     } catch (error) {
-      setStatus("loadStatus", error.message, "error");
+      setStatus("loadStatus", explainFetchError(error), "error");
     } finally {
       setLoading(button, false, "Load stock ↗");
     }
@@ -487,8 +497,9 @@
       $("compareResults").innerHTML = '<table><thead><tr><th>Company</th><th>Latest price</th><th>Revenue growth</th><th>Operating margin</th><th>Debt / equity</th><th>Forward P/E</th><th>ROE</th><th>Screen score</th></tr></thead><tbody>' + cells + '</tbody></table>';
       setStatus("compareStatus", "Comparison loaded. Metrics may be missing and may not be directly comparable across sectors.", "good");
     } catch (error) {
-      $("compareResults").innerHTML = '<div class="empty"><strong>Comparison unavailable</strong>' + escapeHtml(error.message) + '</div>';
-      setStatus("compareStatus", error.message, "error");
+      const message = explainFetchError(error);
+      $("compareResults").innerHTML = '<div class="empty"><strong>Comparison unavailable</strong>' + escapeHtml(message) + '</div>';
+      setStatus("compareStatus", message, "error");
     } finally { setLoading(button, false, "Compare →"); }
   }
 
