@@ -300,7 +300,7 @@
         <div class="summary-box"><span>Unrealized P/L</span><strong id="totalPL">—</strong></div>
       </div>
       <div class="card panel">
-        <div class="panel-head"><div><h2>Your holdings</h2><p class="panel-sub">Prices are updated only when you refresh them. Values are stored locally in this browser.</p></div><button class="button secondary" id="exportPortfolioBtn">Export CSV ↓</button></div>
+        <div class="panel-head"><div><h2>Your holdings</h2><p class="panel-sub">Prices are updated only when you refresh them. Values are stored locally and totals are grouped by currency.</p></div><button class="button secondary" id="exportPortfolioBtn">Export CSV ↓</button></div>
         <div class="table-wrap" id="portfolioResults"></div>
         <div class="status" id="portfolioStatus"></div>
         <div class="notice">Use this only for educational tracking. The portfolio sandbox does not model fees, taxes, dividends, corporate actions or currency conversion. Different currencies should not be summed together without conversion.</div>
@@ -509,21 +509,29 @@
   }
 
   function portfolioTotals() {
-    let invested = 0, current = 0;
+    const groups = new Map();
     portfolio.forEach((item) => {
+      const currency = item.currency || "N/A";
+      const row = groups.get(currency) || {currency, invested:0, current:0};
       const quantity = numberOrNull(item.quantity) || 0;
-      invested += quantity * (numberOrNull(item.averageCost) || 0);
-      current += quantity * (numberOrNull(item.lastPrice) || 0);
+      row.invested += quantity * (numberOrNull(item.averageCost) || 0);
+      row.current += quantity * (numberOrNull(item.lastPrice) || 0);
+      groups.set(currency, row);
     });
-    return {invested, current, pl:current-invested};
+    return Array.from(groups.values()).map((row) => ({...row, pl:row.current-row.invested}));
+  }
+  function formatCurrencyGroups(totals, field) {
+    return totals.length ? totals.map((item) => formatMoney(item[field], item.currency)).join(" · ") : "—";
   }
 
   function renderPortfolio() {
     const totals = portfolioTotals();
-    $("totalInvested").textContent = formatMoney(totals.invested, "");
-    $("totalCurrent").textContent = formatMoney(totals.current, "");
-    $("totalPL").textContent = (totals.pl >= 0 ? "+" : "") + formatMoney(totals.pl, "");
-    $("totalPL").className = totals.pl >= 0 ? "positive" : "negative";
+    $("totalInvested").textContent = formatCurrencyGroups(totals, "invested");
+    $("totalCurrent").textContent = formatCurrencyGroups(totals, "current");
+    $("totalPL").textContent = totals.length ? totals.map((item) => (item.pl >= 0 ? "+" : "") + formatMoney(item.pl, item.currency)).join(" · ") : "—";
+    const allPositive = totals.length > 0 && totals.every((item) => item.pl >= 0);
+    const allNegative = totals.length > 0 && totals.every((item) => item.pl <= 0);
+    $("totalPL").className = allPositive ? "positive" : allNegative ? "negative" : "";
     if (!portfolio.length) {
       $("portfolioResults").innerHTML = '<div class="empty"><strong>Your portfolio is empty</strong>Load a stock in the sidebar, then select “Add to portfolio”.</div>';
       return;
