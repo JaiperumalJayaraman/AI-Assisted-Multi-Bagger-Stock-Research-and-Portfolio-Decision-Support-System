@@ -6,13 +6,14 @@ A student project for company research, market-data exploration, preliminary fin
 
 ## Two ways to run the project
 
-This repository contains both the original Streamlit prototype and a separate HTML web interface backed by Python/Flask.
+The repository contains the original Streamlit prototype and a separate HTML website backed by a Python/Flask API.
 
-### Option A — HTML website (Flask backend)
+### Option A — Run the HTML website locally
 
-This starts the responsive HTML dashboard in your browser while the Python backend fetches stock information via `yfinance`.
+The browser page needs the Python backend to fetch stock data. **Do not open `index.html` directly by double-clicking it**, and do not expect the GitHub file preview to work as the running app.
 
-**Windows (PowerShell):**
+Install Python 3.10 or newer, then open PowerShell in the project folder:
+
 ```powershell
 py -m venv .venv
 .venv\Scripts\Activate.ps1
@@ -21,20 +22,20 @@ pip install -r requirements.txt
 python server.py
 ```
 
-Then open **http://127.0.0.1:5000** in your browser. Keep the terminal window open while using the site; it runs the backend that supplies market data. Do not double-click `index.html` directly, because the API endpoints require the Python server.
+Keep the terminal window open, then open **http://127.0.0.1:5000** in the browser. The page and its API must run from the same Flask server.
 
-**macOS / Linux:**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-python server.py
-```
+### Option B — Publish it as a website using Render
 
-### Option B — Original Streamlit app
+A static-only host such as GitHub Pages cannot run the Flask/yfinance backend. This repository now has a `render.yaml` blueprint for a Python web service.
 
-Use this if you prefer the original Python dashboard:
+1. Sign in to Render and select **New → Blueprint**.
+2. Connect the GitHub repository `JaiperumalJayaraman/AI-Assisted-Multi-Bagger-Stock-Research-and-Portfolio-Decision-Support-System`.
+3. Review the service settings and deploy the blueprint.
+4. Wait for deployment to finish, then open the HTTPS URL Render gives the service. That deployed URL is the one to share with teammates.
+
+The hosting provider must run the Python backend; merely hosting the HTML file is not enough. Free-host behaviour and availability are controlled by the provider.
+
+### Option C — Run the original Streamlit app
 
 ```powershell
 streamlit run app.py
@@ -49,20 +50,19 @@ Streamlit usually opens at http://localhost:8501.
 - Company summary, sector and industry when available.
 - Financial metrics: revenue growth, operating margin, debt/equity, forward P/E, and return on equity.
 - Explainable, rule-based screening score using available factors.
-- Multi-stock comparison page in the HTML interface.
+- Multi-stock comparison page in the HTML website.
 - Hypothetical portfolio tracker with editable quantity/cost, price refresh, unrealized P/L and CSV export.
-- Responsive HTML, CSS and JavaScript interface, with Flask endpoints that retrieve data on the server side.
+- Responsive HTML, CSS and JavaScript interface with Flask endpoints for market-data retrieval.
 
 ## Tech stack
 
-- Python
-- Flask — backend/API for the HTML site
-- HTML, CSS and JavaScript — web interface
+- Python and Flask — backend/API for the HTML website
+- HTML, CSS and JavaScript — browser interface
 - Streamlit — alternative dashboard
 - yfinance — Yahoo Finance market/company data access
-- pandas — original Streamlit data handling
-- Plotly — original Streamlit charting
-- Chart.js — price chart in the HTML interface
+- pandas and Plotly — original Streamlit app
+- Chart.js — chart in the HTML interface
+- Gunicorn — production WSGI server for hosting
 
 ## Example tickers
 
@@ -78,9 +78,8 @@ This is a preliminary screen—not an estimate of the probability of future retu
 
 - Yahoo Finance data can be delayed, incomplete, or inconsistent. Some tickers and fundamentals will not resolve.
 - The HTML site needs the Flask server running; opening `index.html` directly will not provide stock data.
-- The portfolio is a local, hypothetical tracker, not connected to a brokerage account. It does not model fees, taxes, dividends, corporate actions, or currency conversion. Do not combine different currencies without conversion.
-- The current version does not ingest annual reports, summarize earnings calls, use a large language model, train a predictive model, or backtest a strategy. These are possible future extensions, not current features.
-- A working local server is not the same as a public deployed website. To share the HTML site publicly, deploy the Python backend to a suitable host; GitHub Pages alone cannot run the Flask/yfinance backend.
+- The portfolio is a local, hypothetical tracker, not connected to a brokerage account. It does not model fees, taxes, dividends, corporate actions, or currency conversion. Values are grouped by currency rather than converted.
+- The current version does not ingest annual reports, summarize earnings calls, use a large language model, train a predictive model, or backtest a strategy. These are future extensions, not current features.
 
 ## Next steps
 
@@ -88,7 +87,7 @@ This is a preliminary screen—not an estimate of the probability of future retu
 2. Add annual-report/earnings-call ingestion with citations and risk/opportunity extraction.
 3. Add a research memo with thesis, catalysts, valuation, risks and thesis-break conditions.
 4. Build point-in-time data and leakage-aware backtesting before evaluating any prediction model.
-5. Add automated tests and a deployment workflow.
+5. Add automated tests and monitoring.
 
 ## Disclaimer
 
